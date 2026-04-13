@@ -1,21 +1,202 @@
-<!DOCTYPE html> 
-<html> 
-<head> 
-<title>CI/CD Demo</title> 
-<style> 
-body{ 
-text-align:center; 
-font-family:Times New Roman; 
-background-color:#af0d0d; 
-} 
-h1{ 
-color:#0ef777; 
-} 
-</style> 
-</head> 
-<body> 
-<h1>CI/CD Pipeline Working</h1> 
-<h2>Deployed using Jenkins + Docker + Kubernetes</h2> 
-<p>This webpage is automatically deployed using a CI/CD pipeline.</p> 
-</body> 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Rating Application</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .movie-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input, button {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input {
+            flex: 1;
+            outline: none;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #764ba2;
+        }
+        .rating-input {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .star {
+            font-size: 30px;
+            cursor: pointer;
+            color: #ddd;
+            transition: color 0.2s;
+        }
+        .star:hover, .star.active {
+            color: #ffc107;
+        }
+        .movies-list {
+            margin-top: 30px;
+        }
+        .movie-card {
+            background: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+        }
+        .movie-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .movie-rating {
+            color: #ffc107;
+            font-size: 18px;
+        }
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            float: right;
+        }
+        .delete-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Movie Rating Application</h1>
+        
+        <div class="movie-input">
+            <input type="text" id="movieName" placeholder="Enter movie name..." />
+            <button onclick="addMovie()">Add Movie</button>
+        </div>
+
+        <div class="rating-input">
+            <span>Rate Movie:</span>
+            <div class="star-rating">
+                <span class="star" onclick="setRating(1)">★</span>
+                <span class="star" onclick="setRating(2)">★</span>
+                <span class="star" onclick="setRating(3)">★</span>
+                <span class="star" onclick="setRating(4)">★</span>
+                <span class="star" onclick="setRating(5)">★</span>
+            </div>
+        </div>
+
+        <div class="movies-list" id="moviesList">
+            <h2>Movies</h2>
+            <p id="noMovies" style="text-align: center; color: #999;">No movies added yet</p>
+        </div>
+    </div>
+
+    <script>
+        let currentRating = 0;
+        let movies = JSON.parse(localStorage.getItem('movies')) || [];
+
+        function setRating(rating) {
+            currentRating = rating;
+            document.querySelectorAll('.star').forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        function addMovie() {
+            const movieName = document.getElementById('movieName').value;
+            if (movieName.trim() === '') {
+                alert('Please enter a movie name');
+                return;
+            }
+            if (currentRating === 0) {
+                alert('Please select a rating');
+                return;
+            }
+
+            movies.push({ name: movieName, rating: currentRating });
+            localStorage.setItem('movies', JSON.stringify(movies));
+            document.getElementById('movieName').value = '';
+            currentRating = 0;
+            document.querySelectorAll('.star').forEach(star => star.classList.remove('active'));
+            displayMovies();
+        }
+
+        function deleteMovie(index) {
+            movies.splice(index, 1);
+            localStorage.setItem('movies', JSON.stringify(movies));
+            displayMovies();
+        }
+
+        function displayMovies() {
+            const moviesList = document.getElementById('moviesList');
+            const noMovies = document.getElementById('noMovies');
+
+            if (movies.length === 0) {
+                noMovies.style.display = 'block';
+                moviesList.innerHTML = '<h2>Movies</h2><p id="noMovies" style="text-align: center; color: #999;">No movies added yet</p>';
+                return;
+            }
+
+            noMovies.style.display = 'none';
+            let html = '<h2>Movies</h2>';
+            movies.forEach((movie, index) => {
+                const stars = '★'.repeat(movie.rating) + '☆'.repeat(5 - movie.rating);
+                html += `
+                    <div class="movie-card">
+                        <button class="delete-btn" onclick="deleteMovie(${index})">Delete</button>
+                        <div class="movie-title">${movie.name}</div>
+                        <div class="movie-rating">${stars} (${movie.rating}/5)</div>
+                    </div>
+                `;
+            });
+            moviesList.innerHTML = html;
+        }
+
+        displayMovies();
+    </script>
+</body>
 </html>
