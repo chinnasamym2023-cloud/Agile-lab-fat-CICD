@@ -1,32 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: html-demo
+  name: Movie-Rating
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: html-demo
+      app: Movie-Rating
   template:
     metadata:
       labels:
-        app: html-demo
+        app: Movie-Rating
     spec:
       containers:
-      - name: html-demo
-        image: chinnasamy23mis0481/html-demo:latest
+      - name: Movie-Rating
+        image: chinnasamy23mis0481/Movie-Rating:latest
         ports:
-        - containerPort: 80
+        - containerPort: 81
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: html-demo-service
+  name: Movie-Rating-service
 spec:
   type: NodePort
   selector:
-    app: html-demo
+    app: Movie-Rating
   ports:
-  - port: 80
-    targetPort: 80
-    nodePort: 30011
+  - port: 81
+    targetPort: 81
+    nodePort: 30012
